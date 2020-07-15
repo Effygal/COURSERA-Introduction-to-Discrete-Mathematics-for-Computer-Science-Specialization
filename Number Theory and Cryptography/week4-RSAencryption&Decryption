@@ -1,0 +1,344 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jul 12 21:04:59 2020
+
+@author: Effygal 
+
+week4-Quizz  RSA encryption & decryption
+"""
+import sys, threading
+
+
+sys.setrecursionlimit(10**7)
+threading.stack_size(2**27)
+
+
+def ConvertToInt(message_str):
+  res = 0
+  for i in range(len(message_str)):
+    res = res * 256 + ord(message_str[i])
+  return res
+
+def ConvertToStr(n):
+    res = ""
+    while n > 0:
+        res += chr(n % 256)
+        n //= 256
+    return res[::-1]
+
+def PowMod(a, n, mod):
+    if n == 0:
+        return 1 % mod
+    elif n == 1:
+        return a % mod
+    else:
+        b = PowMod(a, n // 2, mod)
+        b = b * b % mod
+        if n % 2 == 0:
+          return b
+        else:
+          return b * a % mod
+
+def ExtendedEuclid(a, b):
+    if b == 0:
+        return (1, 0)
+    (x, y) = ExtendedEuclid(b, a % b)
+    k = a // b
+    return (y, x - k * y)
+
+def InvertModulo(a, n):
+    (b, x) = ExtendedEuclid(a, n)
+    if b < 0:
+        b = (b % n + n) % n
+    return b
+
+def Decrypt(ciphertext, p, q, exponent):
+    d = InvertModulo(exponent, (p-1)*(q-1))
+    return ConvertToStr(PowMod(ciphertext, d, p * q))
+
+p = 779849711281
+q = 748173698927
+e = 1018651
+ciphertext = 148784435264686331994392
+decrypt_first_puzzle = Decrypt(ciphertext, p, q, e)
+print(decrypt_first_puzzle)
+
+
+"""
+1.Implement RSA encryption with the given public key modulo, exponentmodulo,exponent.
+
+You have access to the function PowMod(a, n, modulo)PowMod(a,n,modulo) which computes a^n mod modulo 
+using the fast modular exponentiation algorithm from the previous module. 
+You also have access to the function ConvertToInt(message)ConvertToInt(message) which converts a text message to an integer.
+
+You need to fix the implementation of the function Encrypt(message, modulo, exponent)Encrypt(message,modulo,exponent) to return the integer ciphertext 
+according to RSA encryption algorithm.
+"""
+def Encrypt(message, modulo, exponent):
+  # Fix this implementation
+  return PowMod(ConvertToInt(message), exponent, modulo)
+
+"""
+2. Implement RSA decryption with the given private key p, q, exponentp,q,exponent.
+
+You have access to the function ConvertToStr(m)ConvertToStr(m) which converts from integer m 
+to the plaintext message. You also have access to the function InvertModulo(a, n),
+which takes coprime integers a and n as inputs and returns integer b 
+such that ab ≡ 1 mod n. You also have access to the function PowMod(a, n, modulo),
+which computes a^n mod modulo using fast modular exponentiation.
+
+You need to fix the implementation of the function Decrypt(ciphertext, p, q, exponent)
+to decrypt the message which was encrypted using the public key (n = pq, e = exponent).
+"""
+
+  
+#p = 1000000007
+#q = 1000000009
+#exponent = 23917
+#modulo = p * q
+#ciphertext = Encrypt("attack", modulo, exponent)
+#message = Decrypt(ciphertext, p, q, exponent)
+#print(message)
+
+
+"""
+3.Secret agent Alice has sent one of the following messages to the center:
+
+1 attack
+2 don't attack
+3 wait
+
+Alice has ciphered her message using public key modulo, 
+exponent that is available to you, and you have intercepted her ciphertext. 
+You want to know what was the content of her message. You have access to the function Encrypt(message, modulo, exponent)
+which takes in a message as a string and returns a big integer as a ciphertext. It uses RSA encryption with public key modulo, exponentmodulo,exponent. 
+In the starter code, you have an example usage of the function Encrypt.
+
+You also have function DecipherSimple(ciphertext, modulo, exponent, potential_messages)
+implemented in the starter code. You need to fix this implementation to solve the problem. 
+It should take the ciphertextciphertext sent from Alice to the center, the public key modulo, 
+exponentmodulo,exponent and the set of potential messages that Alice could have sent, and return the message 
+that Alice encrypted and sent as a string. 
+For example, if Alice took message "wait", encrypted it with the given modulomodulo and exponentexponent, 
+and got number 139763215139763215 as the ciphertext, you will need to return the string "wait" 
+given the ciphertext = 139763215ciphertext=139763215, modulomodulo, exponentexponent and potential_messages = ["attack", "don't\ attack", "wait"]potential_messages=["attack","don 
+′
+ t attack","wait"].
+"""
+
+def DecipherSimple(ciphertext, modulo, exponent, potential_messages):
+  # Fix this implementation
+  for i in range(len(potential_messages)):
+    if ciphertext == Encrypt(potential_messages[i], modulo, exponent):
+      return potential_messages[i]
+    return "don't know"
+
+#modulo = 101
+#exponent = 12
+#ciphertext = Encrypt("attack", modulo, exponent)
+#print(ciphertext)
+#print(DecipherSimple(ciphertext, modulo, exponent, ["attack", "don't attack", "wait"]))
+
+ciphertext = 336184023047118677086739
+modulo = 1110014195838866450995043
+exponent = 767549
+potential_messages = ["http://goo.gl/", "http://tinyurl.com/", "http://bit.ly/", "http://t.co/", "http://ow.ly/", "https://is.gd/", "https://buff.ly/", "http://adf.ly/", "http://bit.do/"]
+decrypt_second_puzzle = DecipherSimple(ciphertext, modulo, exponent, potential_messages)
+print(decrypt_second_puzzle)
+
+secret_link = decrypt_second_puzzle + decrypt_first_puzzle
+print(secret_link)
+
+
+
+
+"""
+4.Alice is using RSA encryption with a public key modulo, exponentmodulo,exponent such that modulo = p \cdot qmodulo=p⋅q with one of the primes pp and qq being less than 1\;000\;0001000000, and you know about it. You want to break the cipher and decrypt her message.
+
+You can use the function Decrypt(ciphertext, p, q, e)Decrypt(ciphertext,p,q,e) which decrypts the ciphertextciphertext given the private key p, qp,q and the public exponent ee.
+
+You are also given the function DecipherSmallPrime(ciphertext, modulo, exponent)DecipherSmallPrime(ciphertext,modulo,exponent), and you need to fix its implementation so that it can decipher the ciphertextciphertext in case when one of the prime factors of the public modulo is smaller than 1\;000\;0001000000.
+"""
+def DecipherSmallPrime(ciphertext, modulo, exponent):
+    for i in range(1, 1000000):
+        if modulo % i == 0:
+            small_prime = i
+            big_prime = modulo // small_prime
+            return Decrypt(ciphertext, small_prime, big_prime, exponent)
+    return "don't know"
+    
+  
+#modulo = 101 * 18298970732541109011012304219376080251334480295537316123696052970419466495220522723330315111017831737980079504337868198011077274303193766040393009648852841770668239779097280026631944319501437547002412556176186750790476901358334138818777298389724049250700606462316428106882097210008142941838672676714188593227684360287806974345181893018133710957167334490627178666071809992955566020058374505477745993383434501768887090900283569055646901291270870833498474402084748161755197005050874785474707550376333429671113753137201128897550014524209754619355308207537703754006699795711188492048286436285518105948050401762394690148387
+#exponent = 239
+#ciphertext = Encrypt("attack", modulo, exponent)
+#print(ciphertext)
+#print(DecipherSmallPrime(ciphertext, modulo, exponent))
+    
+ciphertext = 1
+modulo = 100000000000000000
+exponent = 1
+decrypt_third_puzzle = DecipherSmallPrime(ciphertext, modulo, exponent)
+print(decrypt_third_puzzle)
+
+"""
+5.Alice is using RSA encryption with a public key modulo, exponentmodulo,exponent such that modulo = p \cdot qmodulo=p⋅q with |p - q| < 5\;000∣p−q∣<5000, and you know about it. You want to break the cipher and decrypt her message.
+
+You have access to the function Decrypt(ciphertext, p, q, e)Decrypt(ciphertext,p,q,e) which decrypts the ciphertextciphertext given the private key p, qp,q and the public exponent ee. You also have access to the function IntSqrt(n)IntSqrt(n) which takes integer nn and returns the largest integer xx such that x^2 \leq nx 
+2
+ ≤n.
+
+You are also given the function DecipherSmallDiff(ciphertext, modulo, exponent)DecipherSmallDiff(ciphertext,modulo,exponent), and you need to fix its implementation so that it can decipher the ciphertextciphertext in case when the difference beteween prime factors of the public modulo is smaller than 5\;0005000.
+"""
+def IntSqrt(n):
+  low = 1
+  high = n
+  iterations = 0
+  while low < high and iterations < 5000:
+    iterations += 1
+    mid = (low + high + 1) // 2
+    if mid * mid <= n:
+      low = mid
+    else:
+      high = mid - 1
+  return low
+
+
+
+def DecipherSmallDiff(ciphertext, modulo, exponent):
+    def isSqr(n):
+        a = int(n**0.5)
+        return a * a == n
+    s = 2
+    while s <= 5000:
+      l = modulo + (s//2)**2
+      if isSqr(l) == True:
+        break
+      else:
+        s += 2
+    p = int(s//2 + l**0.5)
+    q = modulo // p
+    return Decrypt(ciphertext, p, q, exponent)
+            
+#p = 1000000007
+#q = 1000000009
+#n = p * q
+#e = 239
+#ciphertext = Encrypt("attack", n, e)
+#message = DecipherSmallDiff(ciphertext, n, e)
+#print(ciphertext)
+#print(message)
+
+ciphertext = 1
+modulo = 10000000000000000000
+exponent = 1
+decrypt_fourth_puzzle = DecipherSmallDiff(ciphertext, modulo, exponent)
+print(decrypt_fourth_puzzle)
+
+second_secret_link = decrypt_third_puzzle + decrypt_fourth_puzzle
+print(second_secret_link)
+
+"""
+6.You've discovered that the first prime number pp for the private key was generated with the same algorithm and the same random seed by two different senders Alice and Angelina due to insufficient randomness, while the second prime qq is different for those two private keys. You want to break both ciphers and decipher messages from both Alice and Angelina.
+
+You are given the function Decrypt(ciphertext, p, q, e)Decrypt(ciphertext,p,q,e) which decrypts the ciphertextciphertext given the private key p, qp,q and the public exponent ee.
+
+You are also given the function DecipherCommonDivisor(first\_ciphertext, first\_modulo, first\_exponent,\\ second\_ciphertext, second\_modulo, second\_exponent)DecipherCommonDivisor(first_ciphertext,first_modulo,first_exponent,
+second_ciphertext,second_modulo,second_exponent).
+
+You need to fix its implementation so that it can decipher both first\_ciphertextfirst_ciphertext and second\_ciphertextsecond_ciphertext in case when first\_modulofirst_modulo and second\_modulosecond_modulo share a prime factor.
+"""
+def GCD(a, b):
+  if b == 0:
+    return a
+  return GCD(b, a % b)
+  
+def DecipherCommonDivisor(first_ciphertext, first_modulo, first_exponent, second_ciphertext, second_modulo, second_exponent):
+  # Fix this implementation to correctly decipher both messages in case
+  # first_modulo and second_modulo share a prime factor, and return
+  # a pair (first_message, second_message). The implementation below won't work
+  # if the common_prime is bigger than 1000000.
+  common_prime = GCD(first_modulo, second_modulo)
+  if common_prime <=1000000:
+    q1 = first_modulo // common_prime
+    q2 = second_modulo // common_prime
+    return (Decrypt(first_ciphertext, common_prime, q1, first_exponent), Decrypt(second_ciphertext, common_prime, q2, second_exponent))
+  return ("unknown message 1", "unknown message 2")
+  
+ 
+#p = 101
+#q1 = 18298970732541109011012304219376080251334480295537316123696052970419466495220522723330315111017831737980079504337868198011077274303193766040393009648852841770668239779097280026631944319501437547002412556176186750790476901358334138818777298389724049250700606462316428106882097210008142941838672676714188593227684360287806974345181893018133710957167334490627178666071809992955566020058374505477745993383434501768887090900283569055646901291270870833498474402084748161755197005050874785474707550376333429671113753137201128897550014524209754619355308207537703754006699795711188492048286436285518105948050401762394690148387
+#q2 = 1000000007
+#first_modulo = p * q1
+#second_modulo = p * q2
+#first_exponent = 239
+#second_exponent = 17
+#first_ciphertext = Encrypt("attack", first_modulo, first_exponent)
+#second_ciphertext = Encrypt("wait", second_modulo, second_exponent)
+#print(DecipherCommonDivisor(first_ciphertext, first_modulo, first_exponent, second_ciphertext, second_modulo, second_exponent))
+
+first_ciphertext = 1
+first_modulo = 1000000000000000
+first_exponent = 1
+second_ciphertext = 1
+second_modulo = 9999999999999999
+second_exponent = 1
+
+decrypt_sixth_puzzle = DecipherCommonDivisor(first_ciphertext, first_modulo, first_exponent, second_ciphertext, second_modulo, second_exponent)
+print(decrypt_sixth_puzzle)
+
+"""
+7.Bob has sent the same messagemessage to Alice and Angelina using two different public keys (n_1, e = 2)
+and (n_2, e = 2)with the same exponent e = 2. Implement Hastad's broadcast attack from the lectures for this case to decipher the message using the intercepted ciphertexts first\_ciphertextfirst_ciphertext and second\_ciphertextsecond_ciphertext.
+You have access to the function ConvertToStr(m) which converts an integer to a plaintext message. 
+You also have access to the function ChineseRemainderTheorem(n1, r1, n2, r2)
+which takes two coprime modulos n1 and n2 and two corresponding remainders r1 and r2.
+and returns such integer r that r ≡ r1 mod n1 and r ≡ r2 mod n2 and 0 <= r <= n1n2.
+You also have access to the function IntSqrt(n)IntSqrt(n) which takes an integer nn and 
+returns the largest integer x such that x^2 ≤ n.
+Fix the implementation of the function 
+DecipherHastad(first_ciphertext, first_modulo, second_ciphertext, second_modulo),to return the messagemessage that Bob has encrypted and sent.
+"""
+def ChineseRemainderTheorem(n1, r1, n2, r2):
+  (x, y) = ExtendedEuclid(n1, n2)
+  return ((r2 * x * n1 + r1 * y * n2) % (n1 * n2) + (n1 * n2)) % (n1 * n2)
+
+def DecipherHastad(first_ciphertext, first_modulo, second_ciphertext, second_modulo):
+  # Fix this implementation
+  r = ChineseRemainderTheorem(first_modulo, first_ciphertext, second_modulo, second_ciphertext)
+  return ConvertToStr(int(r**0.5))
+  
+#p1 = 790383132652258876190399065097
+#q1 = 662503581792812531719955475509
+#p2 = 656917682542437675078478868539
+#q2 = 1263581691331332127259083713503
+#n1 = p1 * q1
+#n2 = p2 * q2
+#ciphertext1 = Encrypt("attack", n1, 2)
+#ciphertext2 = Encrypt("attack", n2, 2)
+#message = DecipherHastad(ciphertext1, n1, ciphertext2, n2)
+#print(message)
+first_ciphertext = 1
+first_modulo = 100000000000000
+second_ciphertext = 1
+second_modulo = 999999999999999
+
+decrypt_seventh_puzzle = DecipherHastad(first_ciphertext, first_modulo, second_ciphertext, second_modulo)
+print(decrypt_seventh_puzzle)
+
+final_answer = decrypt_sixth_puzzle[0] + decrypt_sixth_puzzle[1] + decrypt_seventh_puzzle
+print(final_answer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

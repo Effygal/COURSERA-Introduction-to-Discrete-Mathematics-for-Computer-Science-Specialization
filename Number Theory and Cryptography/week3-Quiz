@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jul  4 16:16:29 2020
+
+@author: Effygal
+"""
+def ExtendedEuclid(a, b):
+  assert a >= b and b >= 0 and a + b > 0
+
+  if b == 0:
+    d, x, y = a, 1, 0
+  else:
+    (d, p, q) = ExtendedEuclid(b, a % b)
+    x = q
+    y = p - q * (a // b)
+  assert a % d == 0 and b % d == 0
+  assert d == a * x + b * y
+  return (d, x, y)
+
+def ChineseRemainderTheorem(n1, r1, n2, r2):
+  d, x, y = ExtendedEuclid(n1, n2)
+  r = r1 * n2 * y + r2 * n1 * x
+  r = r % (n1 * n2)
+  assert 0 <= r < n1 * n2
+  return r
+
+"""
+Fast Modular Exponentiation: Code
+1.Question 1
+Implement the function FastModularExponentiation(b, k, m)FastModularExponentiation(b,k,m) which computes b^2^k mod m 
+using only around 2k modular multiplications. You are not allowed to use Python built-in exponentiation functions.
+"""
+def FastModularExponentiation(b, k, m):
+  # your code here
+  #start with c = b mod m = b % m
+  c = b % m
+  for i in range (k):
+      c = (c ** 2) % m
+     
+  return c
+#print (FastModularExponentiation(2, 238, 239))
+"""
+2.Question 2
+Implement the function FastModularExponentiation(b, e, m)FastModularExponentiation(b,e,m) which computes b^e mod m 
+using around 2log2(e) modular multiplications. You are not allowed to use Python built-in exponentiation functions.
+"""
+def FastModularExponentiation(b, e, m):
+  # your code here
+  def ModularExponentiation(b, k, m):
+      c = b % m
+      for i in range (k):
+          c = (c ** 2) % m
+      return c
+      
+  ebin = bin(e)[2:][::-1]#a str
+  print(ebin)
+  result = 1
+  for i in range(len(ebin)):
+      if ebin[i] == "1":
+          c = ModularExponentiation(b, i, m)
+          result *= c
+  return result % m
+print(FastModularExponentiation(34, 60, 77))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
