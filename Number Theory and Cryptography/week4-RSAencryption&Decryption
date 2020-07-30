@@ -129,10 +129,10 @@ given the ciphertext = 139763215ciphertext=139763215, modulomodulo, exponentexpo
 
 def DecipherSimple(ciphertext, modulo, exponent, potential_messages):
   # Fix this implementation
-  for i in range(len(potential_messages)):
-    if ciphertext == Encrypt(potential_messages[i], modulo, exponent):
-      return potential_messages[i]
-    return "don't know"
+  for i in potential_messages:
+    if ciphertext == Encrypt(i, modulo, exponent):
+      return i
+  return "don't know"
 
 #modulo = 101
 #exponent = 12
