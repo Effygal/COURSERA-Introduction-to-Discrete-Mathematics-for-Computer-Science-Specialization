@@ -306,7 +306,7 @@ def ChineseRemainderTheorem(n1, r1, n2, r2):
 def DecipherHastad(first_ciphertext, first_modulo, second_ciphertext, second_modulo):
   # Fix this implementation
   r = ChineseRemainderTheorem(first_modulo, first_ciphertext, second_modulo, second_ciphertext)
-  return ConvertToStr(int(r**0.5))
+  return ConvertToStr(IntSqrt(r))
   
 #p1 = 790383132652258876190399065097
 #q1 = 662503581792812531719955475509
